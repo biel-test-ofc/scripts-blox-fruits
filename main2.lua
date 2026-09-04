@@ -1,56 +1,52 @@
--- BIBI HUB: Chest Farm v1.0 📦
--- Mesma interface → Agora procura BAÚS/TESOUROS
--- ✅ ON/OFF | TP Manual | Fundo main.jpeg | Sem pasta
+-- BIBI HUB: BAÚS/TESOUROS v1.5 ✅ TELA NÃO CINZA
+-- Fundo seguro + main.jpeg opcional | Sem pastas
 local BibiHub = {
     Nome = "Bibi Hub",
-    Versao = "1.0-Chest",
-    CorPrincipal = Color3.fromRGB(255, 105, 180), -- Rosa Bibi 💖
+    Versao = "1.5-Chest-Fix",
+    CorPrincipal = Color3.fromRGB(255, 105, 180),
     CorSecundaria = Color3.fromRGB(80, 80, 255),
     Ativo = true,
     PodeTrocarServidor = false
 }
 
--- Serviços
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 
 local Jogador = Players.LocalPlayer
-local Gui = Jogador:WaitForChild("PlayerGui")
+local Gui = Jogador:WaitForChild("PlayerGui", 10)
 local Personagem, Raiz
 
--- 🔹 Fundo: main.jpeg (mesmo lugar, sem pasta)
+-- 🔹 FUNDO SEGURO: Nunca fica invisível/cinza
 local function CarregarFundo(container)
-    local FundoImagem = Instance.new("ImageLabel", container)
-    FundoImagem.Name = "FundoBibi"
-    FundoImagem.Size = UDim2.new(1, 0, 1, 0)
-    FundoImagem.Position = UDim2.new(0, 0, 0, 0)
-    FundoImagem.BackgroundTransparency = 1
-    FundoImagem.ZIndex = -10
-    FundoImagem.ScaleType = Enum.ScaleType.StretchToFill
+    -- Cor base SEMPRE visível
+    container.BackgroundColor3 = Color3.fromRGB(22, 22, 55)
+    container.BackgroundTransparency = 0
+    container.BorderSizePixel = 0
 
-    local sucesso, _ = pcall(function()
-        FundoImagem.Image = "rbxasset://main.jpeg"
+    -- Tenta imagem decorativa (não quebra se falhar)
+    pcall(function()
+        local FundoImg = Instance.new("ImageLabel", container)
+        FundoImg.Name = "FundoDecor"
+        FundoImg.Size = UDim2.new(1, 0, 1, 0)
+        FundoImg.Position = UDim2.new(0, 0, 0, 0)
+        FundoImg.ZIndex = -1
+        FundoImg.Image = "rbxasset://main.jpeg"
+        FundoImg.ScaleType = Enum.ScaleType.StretchToFill
+        FundoImg.BackgroundTransparency = 0.25
     end)
-
-    if not sucesso then
-        FundoImagem:Destroy()
-        container.BackgroundColor3 = Color3.fromRGB(25, 25, 50)
-        print("⚠️ main.jpeg não encontrado — fundo padrão")
-    else
-        container.BackgroundTransparency = 0.2
-        print("✅ Fundo carregado: main.jpeg")
-    end
 end
 
--- 🔹 Tela de Carregamento
+-- 🔹 Tela de carregamento visível
 local function TelaCarregamento()
     local Tela = Instance.new("ScreenGui", Gui)
-    Tela.Name = "Bibi_Load"
+    Tela.Name = "Bibi_Load_Baus"
+    Tela.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
     local Fundo = Instance.new("Frame", Tela)
     Fundo.Size = UDim2.new(1,0,1,0)
-    CarregarFundo(Fundo)
-    
+    Fundo.BackgroundColor3 = Color3.fromRGB(15,15,40)
+
     local Titulo = Instance.new("TextLabel", Fundo)
     Titulo.Size = UDim2.new(0,300,0,60)
     Titulo.Position = UDim2.new(0.5,-150,0.4,-30)
@@ -59,201 +55,172 @@ local function TelaCarregamento()
     Titulo.TextColor3 = BibiHub.CorPrincipal
     Titulo.Font = Enum.Font.GothamBold
     Titulo.TextScaled = true
-    
-    task.wait(0.8)
+
+    task.wait(0.6)
     Tela:Destroy()
 end
 
--- 🔹 Interface Completa
+-- 🔹 Interface COMPLETA e VISÍVEL
 local function CriarInterface()
     local Main = Instance.new("ScreenGui", Gui)
-    Main.Name = "BibiHub_Chest"
+    Main.Name = "BibiHub_Baus"
     Main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    
+    Main.Enabled = true
+    Main.ResetOnSpawn = false
+
     local Janela = Instance.new("Frame", Main)
     Janela.Position = UDim2.new(0.02,0,0.08,0)
     Janela.Size = UDim2.new(0,320,0,400)
-    Janela.BorderSizePixel = 0
-    Janela.ClipsDescendants = true
+    Janela.BackgroundTransparency = 0
     CarregarFundo(Janela)
-    
+
     -- Cabeçalho
     local Cab = Instance.new("Frame", Janela)
-    Cab.Size = UDim2.new(1,0,0,38)
+    Cab.Size = UDim2.new(1,0,0,40)
+    Cab.ZIndex = 10
     Cab.BackgroundColor3 = BibiHub.CorPrincipal
-    Cab.ZIndex = 5
     local Titulo = Instance.new("TextLabel", Cab)
     Titulo.Size = UDim2.new(1,0,1,0)
-    Titulo.Text = "💖 BIBI HUB - BAÚS/TESOUROS"
+    Titulo.Text = "📦 BAÚS / TESOUROS"
     Titulo.TextColor3 = Color3.new(1,1,1)
     Titulo.Font = Enum.Font.GothamBold
     Titulo.TextScaled = true
-    
+
     -- Botão ON/OFF
     local BtnOnOff = Instance.new("TextButton", Janela)
-    BtnOnOff.Position = UDim2.new(0.05,0,0.12,0)
-    BtnOnOff.Size = UDim2.new(0.42,0,0,32)
+    BtnOnOff.Position = UDim2.new(0.05,0,0.14,0)
+    BtnOnOff.Size = UDim2.new(0.4,0,0,35)
+    BtnOnOff.ZIndex = 10
     BtnOnOff.BackgroundColor3 = Color3.fromRGB(60,180,80)
     BtnOnOff.Text = "🟢 LIGADO"
     BtnOnOff.TextColor3 = Color3.new(1,1,1)
     BtnOnOff.Font = Enum.Font.GothamBold
-    BtnOnOff.TextScaled = true
-    BtnOnOff.ZIndex = 5
-    
+
     -- Botão Servidor
     local BtnServidor = Instance.new("TextButton", Janela)
-    BtnServidor.Position = UDim2.new(0.53,0,0.12,0)
-    BtnServidor.Size = UDim2.new(0.42,0,0,32)
+    BtnServidor.Position = UDim2.new(0.55,0,0.14,0)
+    BtnServidor.Size = UDim2.new(0.4,0,0,35)
+    BtnServidor.ZIndex = 10
     BtnServidor.BackgroundColor3 = Color3.fromRGB(180,60,60)
-    BtnServidor.Text = "🔒 Servidor: NÃO"
+    BtnServidor.Text = "🔒 Servidor"
     BtnServidor.TextColor3 = Color3.new(1,1,1)
     BtnServidor.Font = Enum.Font.GothamBold
-    BtnServidor.TextScaled = true
-    BtnServidor.ZIndex = 5
-    
+
     -- Status
     local Status = Instance.new("TextLabel", Janela)
-    Status.Position = UDim2.new(0.05,0,0.22,0)
-    Status.Size = UDim2.new(0.9,0,0,22)
+    Status.Position = UDim2.new(0.05,0,0.27,0)
+    Status.Size = UDim2.new(0.9,0,0,25)
     Status.BackgroundTransparency = 1
-    Status.Text = "✅ Procurando Baús..."
-    Status.TextColor3 = Color3.fromRGB(100,255,100)
+    Status.ZIndex = 10
+    Status.Text = "✅ Procurando baús..."
+    Status.TextColor3 = Color3.fromRGB(120,255,120)
     Status.Font = Enum.Font.GothamSemibold
-    Status.TextScaled = true
-    Status.ZIndex = 5
-    
+
     -- Lista
     local ListaFrame = Instance.new("Frame", Janela)
-    ListaFrame.Position = UDim2.new(0.05,0,0.29,0)
-    ListaFrame.Size = UDim2.new(0.9,0,0.66,0)
-    ListaFrame.BackgroundColor3 = Color3.fromRGB(35,35,65,0.8)
-    ListaFrame.ZIndex = 5
-    
+    ListaFrame.Position = UDim2.new(0.05,0,0.38,0)
+    ListaFrame.Size = UDim2.new(0.9,0,0.58,0)
+    ListaFrame.ZIndex = 10
+    ListaFrame.BackgroundColor3 = Color3.fromRGB(40,40,80,0.7)
+
     local ListaTitulo = Instance.new("TextLabel", ListaFrame)
-    ListaTitulo.Size = UDim2.new(1,0,0,26)
+    ListaTitulo.Size = UDim2.new(1,0,0,28)
     ListaTitulo.BackgroundColor3 = BibiHub.CorSecundaria
-    ListaTitulo.Text = "📦 Baús (Clique ➡️ para ir)"
+    ListaTitulo.Text = "📦 Baús Encontrados"
     ListaTitulo.TextColor3 = Color3.new(1,1,1)
     ListaTitulo.Font = Enum.Font.GothamBold
     ListaTitulo.TextScaled = true
-    
+
     local Lista = Instance.new("ScrollingFrame", ListaFrame)
-    Lista.Position = UDim2.new(0,0,0,28)
-    Lista.Size = UDim2.new(1,0,1,-28)
+    Lista.Position = UDim2.new(0,0,0,30)
+    Lista.Size = UDim2.new(1,0,1,-30)
     Lista.BackgroundTransparency = 1
-    Lista.ScrollBarThickness = 5
-    
+    Lista.ScrollBarThickness = 6
+
     -- Eventos
     BtnOnOff.MouseButton1Click:Connect(function()
         BibiHub.Ativo = not BibiHub.Ativo
         BtnOnOff.BackgroundColor3 = BibiHub.Ativo and Color3.fromRGB(60,180,80) or Color3.fromRGB(180,60,60)
         BtnOnOff.Text = BibiHub.Ativo and "🟢 LIGADO" or "🔴 DESLIGADO"
-        Status.Text = BibiHub.Ativo and "✅ Buscando Baús..." or "⏸️ Pausado"
+        Status.Text = BibiHub.Ativo and "✅ Buscando..." or "⏸️ Pausado"
     end)
-    
+
     BtnServidor.MouseButton1Click:Connect(function()
         BibiHub.PodeTrocarServidor = not BibiHub.PodeTrocarServidor
         BtnServidor.BackgroundColor3 = BibiHub.PodeTrocarServidor and Color3.fromRGB(60,180,80) or Color3.fromRGB(180,60,60)
-        BtnServidor.Text = BibiHub.PodeTrocarServidor and "🔓 Servidor: SIM" or "🔒 Servidor: NÃO"
+        BtnServidor.Text = BibiHub.PodeTrocarServidor and "🔓 Servidor" or "🔒 Servidor"
     end)
-    
+
     return {Status=Status, Lista=Lista}
 end
 
--- 🔹 Teleporte Manual
-local function TeleportarPara(parte)
+-- Teleporte
+local function Teleportar(parte)
     if not Raiz or not parte then return end
     Raiz.CFrame = parte.CFrame * CFrame.new(0, 2, 0)
     Raiz.Velocity = Vector3.zero
 end
 
--- 🔹 Loop Principal (PROCURA BAÚS/TESOUROS)
+-- Loop Principal
 local function Iniciar(ui)
     RunService.Heartbeat:Connect(function()
         Personagem = Jogador.Character
         Raiz = Personagem and Personagem:FindFirstChild("HumanoidRootPart")
-        
-        -- Limpa se desligado
-        if not BibiHub.Ativo then
+
+        if not BibiHub.Ativo or not Raiz then
             ui.Lista:ClearAllChildren()
-            ui.Status.Text = "⏸️ Pausado"
             return
         end
-        
-        if not Raiz then
-            ui.Status.Text = "⚠️ Sem personagem"
-            return
-        end
-        
-        -- 🔑 AQUI: Procura BAÚS em vez de frutas!
+
         local Baus = {}
         for _, obj in pairs(Workspace:GetDescendants()) do
-            -- Detecta nomes: Chest, Treasure, Baú, Tesouro etc.
             local ehBau = obj.Name:lower():find("chest") 
                         or obj.Name:lower():find("treasure")
                         or obj.Name:lower():find("bau") 
                         or obj.Name:lower():find("tesouro")
-            
             local Parte = obj:IsA("Model") and obj.PrimaryPart or (obj:IsA("Part") and obj)
             if ehBau and Parte then
-                local Dist = (Raiz.Position - Parte.Position).Magnitude
-                table.insert(Baus, {Nome=obj.Name, Dist=Dist, Parte=Parte})
+                local dist = (Raiz.Position - Parte.Position).Magnitude
+                table.insert(Baus, {Obj=obj, Parte=Parte, Dist=dist})
             end
         end
-        
-        -- Ordena por distância
+
         table.sort(Baus, function(a,b) return a.Dist < b.Dist end)
-        
-        -- Atualiza UI
         ui.Lista:ClearAllChildren()
-        ui.Status.Text = string.format("✅ Encontrados: %d Baús", #Baus)
-        
+
         if #Baus == 0 then
             local Vazio = Instance.new("TextLabel", ui.Lista)
-            Vazio.Size = UDim2.new(1,0,0,28)
+            Vazio.Size = UDim2.new(1,0,0,30)
             Vazio.BackgroundTransparency = 1
-            Vazio.Text = "🔍 Nenhum baú por perto"
-            Vazio.TextColor3 = Color3.new(0.8,0.8,0.8)
+            Vazio.Text = "🔍 Nenhum baú próximo"
+            Vazio.TextColor3 = Color3.new(0.9,0.9,0.9)
             Vazio.Font = Enum.Font.Gotham
-            Vazio.TextScaled = true
-            return
-        end
-        
-        -- Lista com botão IR
-        for i, Bau in ipairs(Baus) do
-            local Item = Instance.new("Frame", ui.Lista)
-            Item.Size = UDim2.new(1,-4,0,30)
-            Item.Position = UDim2.new(0,0,0,(i-1)*32)
-            Item.BackgroundColor3 = Color3.fromRGB(40,40,70)
-            
-            local Nome = Instance.new("TextLabel", Item)
-            Nome.Size = UDim2.new(0.6,0,1,0)
-            Nome.BackgroundTransparency = 1
-            Nome.Text = string.format("📦 %s (%.0fm)", Bau.Nome:sub(1,14), Bau.Dist)
-            Nome.TextColor3 = Color3.new(1,1,1)
-            Nome.Font = Enum.Font.GothamSemibold
-            Nome.TextScaled = true
-            
-            local BtnIr = Instance.new("TextButton", Item)
-            BtnIr.Size = UDim2.new(0.3,0,0.8,0)
-            BtnIr.Position = UDim2.new(0.65,0,0.1,0)
-            BtnIr.BackgroundColor3 = BibiHub.CorPrincipal
-            BtnIr.Text = "➡️ IR"
-            BtnIr.TextColor3 = Color3.new(1,1,1)
-            BtnIr.Font = Enum.Font.GothamBold
-            BtnIr.TextScaled = true
-            
-            BtnIr.MouseButton1Click:Connect(function()
-                TeleportarPara(Bau.Parte)
-            end)
+        else
+            ui.Status.Text = string.format("✅ Encontrados: %d baús", #Baus)
+            for i, bau in ipairs(Baus) do
+                local Item = Instance.new("TextButton", ui.Lista)
+                Item.Size = UDim2.new(1,0,0,32)
+                Item.Position = UDim2.new(0,0,0,(i-1)*34)
+                Item.BackgroundColor3 = Color3.fromRGB(50,50,90,0.8)
+                Item.AutoLocalize = false
+                Item.Text = string.format("📦 %s • %.0fm → Clique", bau.Obj.Name:sub(1,15), bau.Dist)
+                Item.TextColor3 = Color3.new(1,1,1)
+                Item.Font = Enum.Font.GothamSemibold
+                Item.TextScaled = true
+                Item.MouseButton1Click:Connect(function() Teleportar(bau.Parte) end)
+            end
+            ui.Lista.CanvasSize = UDim2.new(0,0,0,#Baus*34)
         end
     end)
 end
 
--- 🚀 Iniciar
+-- Iniciar Tudo
 coroutine.wrap(function()
-    TelaCarregamento()
-    local ui = CriarInterface()
-    Iniciar(ui)
-    print("💖 Bibi Hub Chest Farm Pronto!")
+    local ok, err = pcall(function()
+        TelaCarregamento()
+        local ui = CriarInterface()
+        Iniciar(ui)
+        print("✅ Bibi Hub BAÚS OK")
+    end)
+    if not ok then warn("ERRO BAÚS:", err) end
 end)()
